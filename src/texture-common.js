@@ -16,8 +16,9 @@ const textureData = (function () {
         return program_obj.fbo_data[i].fbo;
     }
 
-    function _init_texture(gl) {
+    function _init_texture(gl, texture_unit) {
         // Create a texture.
+        gl.activeTexture(gl.TEXTURE0 + (texture_unit || 0));
         var texture = gl.createTexture();
 
         // Bind it to texture unit 0's 2D bind point
@@ -39,7 +40,10 @@ const textureData = (function () {
     ///////////////////////////////////////
     // GET IMAGE FROM TEXTURE
 
-    function _drawImageIntoTexture(gl, img_data, image_width, image_height) {
+    function _drawImageIntoTexture(gl, texture, texture_unit, img_data, image_width, image_height) {
+        gl.activeTexture(gl.TEXTURE0 + (texture_unit || 0));
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        
         // Upload the image into the texture.
         var mipLevel = 0;               // the largest mip
         var internalFormat = gl.RGBA;   // format we want in the texture
@@ -68,7 +72,7 @@ const textureData = (function () {
         try {
             gl.texImage2D.apply(gl, args);
         }
-        catch(e) {
+        catch (e) {
             console.warn("Error loading image", img_data);
         }
     }
