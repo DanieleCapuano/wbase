@@ -43,7 +43,7 @@ const textureData = (function () {
     function _drawImageIntoTexture(gl, texture, texture_unit, img_data, image_width, image_height) {
         gl.activeTexture(gl.TEXTURE0 + (texture_unit || 0));
         gl.bindTexture(gl.TEXTURE_2D, texture);
-        
+
         // Upload the image into the texture.
         var mipLevel = 0;               // the largest mip
         var internalFormat = gl.RGBA;   // format we want in the texture
@@ -81,10 +81,10 @@ const textureData = (function () {
         offset = offset || 0;
         let fbo_data = [];
         for (var ii = offset; ii < n + offset; ++ii) {
-            var texture = _init_texture(gl);
+            var texture = _init_texture(gl, 0);
 
             //init with blank images
-            _drawImageIntoTexture(gl, null, image_width, image_height);
+            _drawImageIntoTexture(gl, texture, 0, null, image_width, image_height);
 
             // Create a framebuffer
             var fbo = gl.createFramebuffer();
