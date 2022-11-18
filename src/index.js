@@ -5,7 +5,7 @@ import {
 } from './program-def';
 
 import {
-    textureData
+    textureData as texture_data
 } from './texture-common';
 
 import {
@@ -32,7 +32,7 @@ export {
     init_program,
     init_program_fbos,
     get_program_data,
-    textureData,
+    texture_data,
     get_program_uniforms,
     set_rectangle_coords,
     bind_attribute,
@@ -48,7 +48,7 @@ export default {
     init_program,
     init_program_fbos,
     get_program_data,
-    textureData,
+    texture_data,
     get_program_uniforms,
     set_rectangle_coords,
     bind_attribute,
