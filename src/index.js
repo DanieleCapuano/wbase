@@ -28,7 +28,7 @@ import {
 } from './vertex-common';
 
 
-export const API = {
+export {
     init_program,
     init_program_fbos,
     get_program_data,
@@ -44,4 +44,19 @@ export const API = {
     get_program_elements,
     init_vertex_data
 };
-export default API;
+export default {
+    init_program,
+    init_program_fbos,
+    get_program_data,
+    textureData,
+    get_program_uniforms,
+    set_rectangle_coords,
+    bind_attribute,
+    loadShader,
+    createProgram,
+    createProgramFromSources,
+    resizeCanvasToDisplaySize,
+    draw_shapes,
+    get_program_elements,
+    init_vertex_data
+};
