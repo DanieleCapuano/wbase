@@ -28,7 +28,7 @@ import {
 } from './vertex-common';
 
 
-export default {
+export const API = {
     init_program,
     init_program_fbos,
     get_program_data,
@@ -44,3 +44,4 @@ export default {
     get_program_elements,
     init_vertex_data
 };
+export default API;
