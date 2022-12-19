@@ -54,7 +54,7 @@ function _loadShader(gl, shaderSource, shaderType, opt_errorCallback) {
 
     // Check the compile status
     const compiled = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-    if (!compiled) {
+    if (!compiled && !gl.isContextLost()) {
         // Something went wrong during compilation; get the error
         const lastError = gl.getShaderInfoLog(shader);
         errFn("*** Error compiling shader '" + shader + "':" + lastError);
@@ -88,7 +88,7 @@ function _createProgram(
 
     // Check the link status
     const linked = gl.getProgramParameter(program, gl.LINK_STATUS);
-    if (!linked) {
+    if (!linked && !gl.isContextLost()) {
         // something went wrong with the link
         const lastError = gl.getProgramInfoLog(program);
         errFn("Error in program linking:" + lastError);
