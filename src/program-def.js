@@ -16,12 +16,16 @@ function _init_program(gl, opts) {
             p_o = opts.build_program(gl, shaders);
         }
         else {
-            let program_and_shaders = createProgramFromSources(
-                gl,
-                shaders_src
-            );
+            let ///////////////////////////////
+                pands = createProgramFromSources(
+                    gl,
+                    shaders_src
+                ),
+                program = pands.program,
+                shaders = pands.shaders;
+
             p_o = _init_program_fbos(
-                Object.assign({ program_and_shaders }, _get_program_data(gl, program_and_shaders.program)),
+                Object.assign({ program, shaders }, _get_program_data(gl, program_and_shaders.program)),
                 gl,
                 opts
             );
