@@ -96,7 +96,7 @@ function _createProgram(
         gl.deleteProgram(program);
         return null;
     }
-    return { program, shaders };
+    return program;
 }
 
 /**
@@ -109,7 +109,10 @@ function _createProgramFromSources(
         shaders.push(loadShader(
             gl, shaderSources[ii], gl[defaultShaderType[ii]], opt_errorCallback));
     }
-    return createProgram(gl, shaders, opt_attribs, opt_locations, opt_errorCallback);
+    return {
+        shaders,
+        program: createProgram(gl, shaders, opt_attribs, opt_locations, opt_errorCallback)
+    };
 }
 
 /**
