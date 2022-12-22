@@ -96,7 +96,7 @@ function _createProgram(
         gl.deleteProgram(program);
         return null;
     }
-    return program;
+    return { program, shaders };
 }
 
 /**

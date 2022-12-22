@@ -11,17 +11,17 @@ function _init_program(gl, opts) {
     let p_o = {};
     try {
         // setup GLSL program
-        let shaders = [opts.vertex_shader, opts.fragment_shader].map(sh => _decorate_source(sh));
+        let shaders_src = [opts.vertex_shader, opts.fragment_shader].map(sh => _decorate_source(sh));
         if (opts.build_program) {
             p_o = opts.build_program(gl, shaders);
         }
         else {
-            let program = createProgramFromSources(
+            let program_and_shaders = createProgramFromSources(
                 gl,
-                shaders
+                shaders_src
             );
             p_o = _init_program_fbos(
-                Object.assign({ program }, _get_program_data(gl, program, shaders)),
+                Object.assign({ program_and_shaders }, _get_program_data(gl, program_and_shaders.program)),
                 gl,
                 opts
             );
@@ -39,14 +39,13 @@ function _init_program(gl, opts) {
     return p_o;
 }
 
-function _get_program_data(gl, program, shaders) {
+function _get_program_data(gl, program) {
     let vertex_data = init_vertex_data(gl, program),
         uniforms = get_program_uniforms(gl, program);
 
     return {
         vertex_data,
         uniforms,
-        shaders,
         start_time: performance.now()
     };
 }
