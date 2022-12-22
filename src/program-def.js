@@ -25,7 +25,7 @@ function _init_program(gl, opts) {
                 shaders = pands.shaders;
 
             p_o = _init_program_fbos(
-                Object.assign({ program, shaders }, _get_program_data(gl, program_and_shaders.program)),
+                Object.assign({ program, shaders }, _get_program_data(gl, program)),
                 gl,
                 opts
             );
