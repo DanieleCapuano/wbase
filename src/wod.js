@@ -155,6 +155,8 @@ function _set_uniforms(gl, uniforms_values, object_info) {
             uniform_desc = program_info.uniforms[uniform_name],
             { opts, location } = uniform_desc;
 
+        if (location === null) return;
+
         let val = uniforms_values[uniform_name],
             args = opts.fn.indexOf('Matrix') === -1 ? [location, val] : [location, false, val];
 
