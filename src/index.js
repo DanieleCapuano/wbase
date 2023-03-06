@@ -27,6 +27,16 @@ import {
     init_vertex_data
 } from './vertex-common';
 
+import {
+    create_program,
+    init_vao,
+    generate_attributes_from_config,
+    fill_position_buffer,
+    setup_indices,
+    buffer_data,
+    set_uniforms
+} from './wod';
+
 
 export {
     init_program,
@@ -42,7 +52,14 @@ export {
     resizeCanvasToDisplaySize,
     draw_shapes,
     get_program_elements,
-    init_vertex_data
+    init_vertex_data,
+    create_program,
+    init_vao,
+    generate_attributes_from_config,
+    fill_position_buffer,
+    setup_indices,
+    buffer_data,
+    set_uniforms
 };
 export default {
     init_program,
@@ -58,5 +75,12 @@ export default {
     resizeCanvasToDisplaySize,
     draw_shapes,
     get_program_elements,
-    init_vertex_data
+    init_vertex_data,
+    create_program,
+    init_vao,
+    generate_attributes_from_config,
+    fill_position_buffer,
+    setup_indices,
+    buffer_data,
+    set_uniforms
 };
