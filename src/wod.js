@@ -68,7 +68,7 @@ function _fill_position_buffer(gl, program_info, data) {
     Object.keys(attributes)
         .filter(attr_key => attributes[attr_key].is_position)
         .forEach((attr_name) => {
-            buffer_data(gl, {
+            _buffer_data(gl, {
                 [attr_name]: data  //it usually contains normals as well
             }, program_info);
         });
