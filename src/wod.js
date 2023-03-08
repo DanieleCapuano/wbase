@@ -78,6 +78,8 @@ function _fill_position_buffer(gl, program_info, data) {
 function _init_vao(gl, program_info) {
     const { program, attributes, uniforms } = program_info;
     const vao = program_info.vao || gl.createVertexArray();
+
+    gl.useProgram(program);
     gl.bindVertexArray(vao);
 
     const buffer = gl.createBuffer(),
@@ -110,6 +112,7 @@ function _init_vao(gl, program_info) {
 
     gl.bindVertexArray(null);
     gl.bindBuffer(buffer_bind, null);
+    gl.useProgram(null);
 
     return { vao };
 }
@@ -149,9 +152,8 @@ function _buffer_data(gl, attrs_values, program_info) {
 
 function _set_uniforms(gl, uniforms_values, object_info) {
     const { program_info } = object_info;
-    const { program } = program_info;
+    // const { program } = program_info;
 
-    gl.useProgram(program);
     Object.keys(uniforms_values).forEach((uniform_name) => {
         const /////////////////////////
             uniform_desc = program_info.uniforms[uniform_name],
