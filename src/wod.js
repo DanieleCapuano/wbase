@@ -14,12 +14,9 @@ export const set_uniforms = _set_uniforms;
 function _create_program(gl, vert, frag) {
     // Attach pre-existing shaders
     let vertexShader = loadShader(gl, vert, gl.VERTEX_SHADER);
-    gl.attachShader(program, vertexShader);
-
     let fragmentShader = loadShader(gl, frag, gl.FRAGMENT_SHADER);
-    gl.attachShader(program, fragmentShader);
 
-    return createProgram(gl[vertexShader, fragmentShader]);
+    return createProgram(gl, [vertexShader, fragmentShader]);
 }
 
 function _generate_attributes_from_config(gl, shad_data, coords_dim) {
