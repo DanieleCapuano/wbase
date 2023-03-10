@@ -100,6 +100,8 @@ const textureData = (function () {
                 texture: texture
             };
         }
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         return fbo_data;
     }
 
