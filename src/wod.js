@@ -1,5 +1,7 @@
 //a list of utilities for wod-based applications (to be merged)
 
+import { loadShader, createProgram } from "./utils";
+
 export const create_program = _create_program;
 export const init_vao = _init_vao;
 export const generate_attributes_from_config = _generate_attributes_from_config;
@@ -10,36 +12,14 @@ export const set_uniforms = _set_uniforms;
 
 
 function _create_program(gl, vert, frag) {
-    const program = gl.createProgram();
-
     // Attach pre-existing shaders
-    let vertexShader = _createShader(gl, vert, gl.VERTEX_SHADER);
+    let vertexShader = loadShader(gl, vert, gl.VERTEX_SHADER);
     gl.attachShader(program, vertexShader);
 
-    let fragmentShader = _createShader(gl, frag, gl.FRAGMENT_SHADER);
+    let fragmentShader = loadShader(gl, frag, gl.FRAGMENT_SHADER);
     gl.attachShader(program, fragmentShader);
 
-    gl.linkProgram(program);
-
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-        const info = gl.getProgramInfoLog(program);
-        throw `Could not compile WebGL program. \n\n${info}`;
-    }
-
-    return program;
-}
-
-function _createShader(gl, sourceCode, type) {
-    // Compiles either a shader of type gl.VERTEX_SHADER or gl.FRAGMENT_SHADER
-    const shader = gl.createShader(type);
-    gl.shaderSource(shader, sourceCode);
-    gl.compileShader(shader);
-
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        const info = gl.getShaderInfoLog(shader);
-        throw `Could not compile WebGL program. \n\n${info}`;
-    }
-    return shader;
+    return createProgram(gl[vertexShader, fragmentShader]);
 }
 
 function _generate_attributes_from_config(gl, shad_data, coords_dim) {
