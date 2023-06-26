@@ -37,6 +37,13 @@ import {
     set_uniforms
 } from './wod';
 
+import {
+    get_ubo,
+    get_uniforms_in_ubo,
+    set_unique_ubo_in_program,
+    update_ubo_buffer,
+} from "./ubo";
+
 
 export {
     init_program,
@@ -59,7 +66,11 @@ export {
     fill_position_buffer,
     setup_indices,
     buffer_data,
-    set_uniforms
+    set_uniforms,
+    get_ubo,
+    get_uniforms_in_ubo,
+    set_unique_ubo_in_program,
+    update_ubo_buffer
 };
 export default {
     init_program,
@@ -82,5 +93,9 @@ export default {
     fill_position_buffer,
     setup_indices,
     buffer_data,
-    set_uniforms
+    set_uniforms,
+    get_ubo,
+    get_uniforms_in_ubo,
+    set_unique_ubo_in_program,
+    update_ubo_buffer,
 };

@@ -1,5 +1,6 @@
 //a list of utilities for wod-based applications (to be merged)
 
+import { get_ubo, get_uniforms_in_ubo, update_ubo_buffer } from "./ubo";
 import { loadShader, createProgram } from "./utils";
 
 export const create_program = _create_program;
@@ -79,19 +80,52 @@ function _init_vao(gl, program_info) {
     });
 
     Object.keys(uniforms).forEach((uniform_name) => {
-        Object.assign(
-            program_info.uniforms[uniform_name],
-            {
-                location: gl.getUniformLocation(program, uniform_name)
-            }
-        );
+        if (!program_info.uniforms[uniform_name].ubo) {
+            Object.assign(
+                program_info.uniforms[uniform_name],
+                {
+                    location: gl.getUniformLocation(program, uniform_name)
+                }
+            );
+        }
     });
+    program_info = _setup_ubos(gl, program_info);
 
     gl.bindVertexArray(null);
     gl.bindBuffer(buffer_bind, null);
     gl.useProgram(null);
 
     return { vao };
+}
+
+function _setup_ubos(gl, program_info) {
+    const { program, uniforms } = program_info;
+
+    let ubo_id = 0;
+    const ubos = Object.keys(uniforms)
+        .reduce((ubos_list, uniform_name) => {
+            if (uniforms[uniform_name].ubo) {
+                const ubo_name = uniforms[uniform_name].ubo;
+
+                if (!ubos_list[ubo_name]) {
+                    let ubo_conf = get_ubo(gl, program, ubo_name, ubo_id);
+                    ubo_conf.ubo_variable_names = [uniform_name];
+                    ubos_list[ubo_name] = ubo_conf;
+                    ubo_id++;
+                }
+                else {
+                    ubos_list[ubo_name].ubo_variable_names.push(uniform_name);
+                }
+            }
+            return ubos_list;
+        }, {});
+
+    Object.keys(ubos).forEach(ubo_name => {
+        program_info.ubos = program_info.ubos || {};
+        program_info.ubos[ubo_name] = get_uniforms_in_ubo(gl, program, ubos[ubo_name]);
+    });
+
+    return program_info;
 }
 
 function _setup_indices(gl, indices_data) {
@@ -129,18 +163,37 @@ function _buffer_data(gl, attrs_values, program_info) {
 
 function _set_uniforms(gl, uniforms_values, object_info) {
     const { program_info } = object_info;
-    // const { program } = program_info;
+    const { ubos } = program_info;
 
+    // Object.keys(ubos || {}).forEach(ubo_name => {
+    //     update_ubo_buffer(gl, ubos[ubo_name], uniforms_values);
+    //     uniforms_in_ubos = uniforms_in_ubos.concat(ubos[ubo_name].ubo_variable_names);
+    // });
+    let uniforms_in_ubos = [];
     Object.keys(uniforms_values).forEach((uniform_name) => {
-        const /////////////////////////
-            uniform_desc = program_info.uniforms[uniform_name],
-            { opts, location } = uniform_desc;
+        if (uniforms_in_ubos.indexOf(uniform_name) !== -1) return;  //we've already wrote it using an ubo
 
-        if (location === null) return;
+        let uniform_wrote = false;
+        Object.keys(ubos || {}).forEach(ubo_name => {
+            if (ubos[ubo_name].ubo_variable_names.indexOf(uniform_name) === -1) return;
+            update_ubo_buffer(gl, ubos[ubo_name], uniforms_values);
+            uniform_wrote = true;
 
-        let val = uniforms_values[uniform_name],
-            args = opts.fn.indexOf('Matrix') === -1 ? [location, val] : [location, false, val];
+            //here we're assuming all the variable inside an ubo will be always updated together...
+            uniforms_in_ubos = uniforms_in_ubos.concat(ubos[ubo_name].ubo_variable_names);
+        });
 
-        gl['uniform' + opts.fn].apply(gl, args);
+        if (!uniform_wrote) {
+            const /////////////////////////
+                uniform_desc = program_info.uniforms[uniform_name],
+                { opts, location } = uniform_desc;
+
+            if (location === null) return;
+
+            let val = uniforms_values[uniform_name],
+                args = opts.fn.indexOf('Matrix') === -1 ? [location, val] : [location, false, val];
+
+            gl['uniform' + opts.fn].apply(gl, args);
+        }
     });
 }
