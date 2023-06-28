@@ -31,7 +31,7 @@ function _get_ubo(gl, program, ubo_name, bind_base) {
     // We use dynamic draw because we expect to respecify the contents of the buffer frequently
     gl.bufferData(gl.UNIFORM_BUFFER, blockSize, gl.DYNAMIC_DRAW);
 
-    const ubo_conf = { uboIndex, uboBuffer, uboUniqueBind: bind_base };
+    const ubo_conf = { uboIndex, uboBuffer, blockSize, uboUniqueBind: bind_base };
 
     if (bind_base !== undefined) {
         // Bind the buffer to a binding point
@@ -84,7 +84,7 @@ function _set_unique_ubo_in_program(gl, program, ubo_conf) {
 }
 
 function _update_ubo_buffer(gl, ubo_conf, uniforms_data) {
-    const { uboBuffer, ubo_variable_info } = ubo_conf;
+    const { uboBuffer, ubo_variable_info, blockSize } = ubo_conf;
 
     gl.bindBuffer(gl.UNIFORM_BUFFER, uboBuffer);
 
@@ -92,7 +92,7 @@ function _update_ubo_buffer(gl, ubo_conf, uniforms_data) {
 
     Object.keys(ubo_variable_info).forEach(ubo_vi => {
         if (uniforms_data[ubo_vi] !== undefined) {
-            const d = uniforms_data[ubo_vi].buffer ?
+            const d = uniforms_data[ubo_vi] instanceof Float32Array ?
                 uniforms_data[ubo_vi] :
                 new Float32Array(
                     Array.isArray(uniforms_data[ubo_vi]) ?
@@ -103,7 +103,8 @@ function _update_ubo_buffer(gl, ubo_conf, uniforms_data) {
                 gl.UNIFORM_BUFFER,
                 ubo_variable_info[ubo_vi].offset,
                 d,
-                0
+                0,
+                d.length
             );
         }
     })
