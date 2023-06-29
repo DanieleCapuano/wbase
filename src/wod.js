@@ -47,7 +47,7 @@ function _fill_position_buffer(gl, program_info, data) {
         .filter(attr_key => attributes[attr_key].is_position)
         .forEach((attr_name) => {
             _buffer_data(gl, {
-                [attr_name]: data  //it usually contains normals as well
+                [attr_name]: data  //it usually contains normals, texcoords, ... as well
             }, program_info);
         });
     return program_info;
