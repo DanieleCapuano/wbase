@@ -62,17 +62,35 @@ function _get_uniforms_in_ubo(gl, program, ubo_conf) {
     );
 
     // Get the offset of the member variables inside our Uniform Block in bytes
+    const uboVariableTypes = gl.getActiveUniforms(
+        program,
+        uboVariableIndices,
+        gl.UNIFORM_TYPE
+    );
     const uboVariableOffsets = gl.getActiveUniforms(
         program,
         uboVariableIndices,
         gl.UNIFORM_OFFSET
+    );
+    const uboVariableSizes = gl.getActiveUniforms(
+        program,
+        uboVariableIndices,
+        gl.UNIFORM_SIZE
+    );
+    const uboVariableStrides = gl.getActiveUniforms(
+        program,
+        uboVariableIndices,
+        gl.UNIFORM_ARRAY_STRIDE
     );
 
     return Object.assign(ubo_conf, {
         ubo_variable_info: ubo_variable_names.reduce((uboVariableInfo, name, index) => Object.assign(uboVariableInfo, {
             [name]: {
                 index: uboVariableIndices[index],
+                type: uboVariableTypes[index],
+                size: uboVariableSizes[index],
                 offset: uboVariableOffsets[index],
+                stride: uboVariableStrides[index]
             }
         }), {})
     });
@@ -92,16 +110,10 @@ function _update_ubo_buffer(gl, ubo_conf, uniforms_data) {
 
     Object.keys(ubo_variable_info).forEach(ubo_vi => {
         if (uniforms_data[ubo_vi] !== undefined) {
-            const d = uniforms_data[ubo_vi] instanceof Float32Array ?
-                uniforms_data[ubo_vi] :
-                new Float32Array(
-                    Array.isArray(uniforms_data[ubo_vi]) ?
-                        uniforms_data[ubo_vi] :
-                        [uniforms_data[ubo_vi]]
-                );
+            const d = _build_data_for_buffer(gl, ubo_vi, ubo_variable_info[ubo_vi], uniforms_data[ubo_vi]);
             gl.bufferSubData(
                 gl.UNIFORM_BUFFER,
-                ubo_variable_info[ubo_vi].offset,
+                ubo_variable_info[ubo_vi].offset + ubo_variable_info[ubo_vi].stride,
                 d,
                 0,
                 d.length
@@ -110,4 +122,23 @@ function _update_ubo_buffer(gl, ubo_conf, uniforms_data) {
     })
 
     gl.bindBuffer(gl.UNIFORM_BUFFER, null);
+}
+
+function _build_data_for_buffer(gl, varname, varinfo, data) {
+    if (data instanceof Float32Array) return data;
+    if (varinfo.stride === 0) return new Float32Array(
+        Array.isArray(data) ? data : [data]
+    );
+
+    //we have stride > 0: it's an array
+    //we're only managing Float32 as type and VEC3 as array type
+    const bpe = Float32Array.BYTES_PER_ELEMENT;
+    const groupEl = varinfo.type === gl.FLOAT_VEC3 ? 3 : 1;
+    const ndata = data.length / groupEl;
+    const bytes = bpe * groupEl * varinfo.size;
+    const buf = new Float32Array(bytes);
+    for (let i = 0; i < ndata; i += bpe * groupEl) {
+        buf[i * varinfo.stride] = data[i];
+    }
+    return buf;
 }
