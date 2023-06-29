@@ -1,5 +1,7 @@
 //see https://gist.github.com/jialiang/2880d4cc3364df117320e8cb324c2880 as a reference
 
+import { isSystemLittleEndian } from "./utils";
+
 export const get_ubo = _get_ubo;
 export const get_uniforms_in_ubo = _get_uniforms_in_ubo;
 export const set_unique_ubo_in_program = _set_unique_ubo_in_program;
@@ -101,44 +103,93 @@ function _set_unique_ubo_in_program(gl, program, ubo_conf) {
     gl.uniformBlockBinding(program, uboIndex, uboUniqueBind);
 }
 
-function _update_ubo_buffer(gl, ubo_conf, uniforms_data) {
+
+function _update_ubo_buffer(gl, ubo_conf, uniforms_data, uniforms_desc) {
     const { uboBuffer, ubo_variable_info, blockSize } = ubo_conf;
 
     gl.bindBuffer(gl.UNIFORM_BUFFER, uboBuffer);
 
     // Push some data to our Uniform Buffer
-
-    Object.keys(ubo_variable_info).forEach(ubo_vi => {
-        if (uniforms_data[ubo_vi] !== undefined) {
-            const d = _build_data_for_buffer(gl, ubo_vi, ubo_variable_info[ubo_vi], uniforms_data[ubo_vi]);
-            gl.bufferSubData(
-                gl.UNIFORM_BUFFER,
-                ubo_variable_info[ubo_vi].offset + ubo_variable_info[ubo_vi].stride,
-                d,
-                0,
-                d.length
-            );
-        }
-    })
+    const d = _build_data_for_buffer(gl, blockSize, ubo_variable_info, uniforms_data, uniforms_desc);
+    gl.bufferSubData(
+        gl.UNIFORM_BUFFER,
+        0,
+        d,
+        0,
+        d.length
+    );
 
     gl.bindBuffer(gl.UNIFORM_BUFFER, null);
 }
 
-function _build_data_for_buffer(gl, varname, varinfo, data) {
-    if (data instanceof Float32Array) return data;
-    if (varinfo.stride === 0) return new Float32Array(
-        Array.isArray(data) ? data : [data]
-    );
+const ////////////////////////////////////////////
+    littleEndian = isSystemLittleEndian(),
+    bytesMap = {
+        "1i": Int16Array.BYTES_PER_ELEMENT,
+        "1iv": Int16Array.BYTES_PER_ELEMENT,
+        "2iv": Int16Array.BYTES_PER_ELEMENT,
+        "3iv": Int16Array.BYTES_PER_ELEMENT,
+        "1f": Float32Array.BYTES_PER_ELEMENT,
+        "1fv": Float32Array.BYTES_PER_ELEMENT,
+        "2fv": Float32Array.BYTES_PER_ELEMENT,
+        "3fv": Float32Array.BYTES_PER_ELEMENT,
+        "Matrix2fv": Float32Array.BYTES_PER_ELEMENT,
+        "Matrix3fv": Float32Array.BYTES_PER_ELEMENT,
+        "Matrix4fv": Float32Array.BYTES_PER_ELEMENT
+    },
+    setMapFn = {
+        "1i": "setInt16",
+        "1iv": "setInt16",
+        "2iv": "setInt16",
+        "3iv": "setInt16",
+        "1f": "setFloat32",
+        "1fv": "setFloat32",
+        "2fv": "setFloat32",
+        "3fv": "setFloat32",
+        "Matrix2fv": "setFloat32",
+        "Matrix3fv": "setFloat32",
+        "Matrix4fv": "setFloat32"
+    };
+function _build_data_for_buffer(gl, blockSize, varsinfo, udata, udesc) {
+    const buf = new ArrayBuffer(blockSize),
+        dv = new DataView(buf),
+        varKeys = Object.keys(varsinfo);
 
-    //we have stride > 0: it's an array
-    //we're only managing Float32 as type and VEC3 as array type
-    const bpe = Float32Array.BYTES_PER_ELEMENT;
-    const groupEl = varinfo.type === gl.FLOAT_VEC3 ? 3 : 1;
-    const ndata = data.length / groupEl;
-    const bytes = bpe * groupEl * varinfo.size;
-    const buf = new Float32Array(bytes);
-    for (let i = 0; i < ndata; i += bpe * groupEl) {
-        buf[i * varinfo.stride] = data[i];
+    for (let i = 0; i < varKeys.length; i++) {
+        const /////////////////////////
+            varname = varKeys[i],
+            varinfo = varsinfo[varname],
+            uopts = udesc[varname].opts,
+            d = udata[varname],
+            data = d.buffer || Array.isArray(d) ? d : [d],
+            bpe = bytesMap[uopts.fn],
+            groupEl = (
+                varinfo.type === gl.FLOAT_VEC2 ||
+                varinfo.type === gl.INT_VEC2
+            ) ? 2 : (
+                varinfo.type === gl.FLOAT_VEC3 ||
+                varinfo.type === gl.INT_VEC3
+            ) ? 3 : 1,
+            setFn = setMapFn[uopts.fn];
+
+        if (varinfo.stride === 0) {
+            for (let j = 0; j < data.length; j++) {
+                const dv_i = varinfo.offset + (j * bpe);
+                dv[setFn](dv_i, data[j], littleEndian);
+            }
+        }
+        else {
+            let loopn = 0;
+            for (let j = 0; j < data.length; j += groupEl) {
+                const istart = varinfo.offset + loopn * varinfo.stride;
+                for (let k = 0; k < groupEl; k++) {
+                    dv[setFn](istart + bpe * k, data[j + k], littleEndian);
+                }
+
+                loopn++;
+            }
+        }
     }
-    return buf;
+
+    return dv;
 }

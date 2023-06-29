@@ -20,7 +20,8 @@ import {
     createProgramFromSources,
     resizeCanvasToDisplaySize,
     draw_shapes,
-    get_program_elements
+    get_program_elements,
+    isSystemLittleEndian
 } from './utils';
 
 import {
@@ -59,6 +60,7 @@ export {
     resizeCanvasToDisplaySize,
     draw_shapes,
     get_program_elements,
+    isSystemLittleEndian,
     init_vertex_data,
     create_program,
     init_vao,
@@ -86,6 +88,7 @@ export default {
     resizeCanvasToDisplaySize,
     draw_shapes,
     get_program_elements,
+    isSystemLittleEndian,
     init_vertex_data,
     create_program,
     init_vao,

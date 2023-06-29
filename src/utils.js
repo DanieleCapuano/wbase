@@ -10,6 +10,7 @@ export const createProgramFromSources = _createProgramFromSources;
 export const resizeCanvasToDisplaySize = _resizeCanvasToDisplaySize;
 export const draw_shapes = _draw_shapes;
 export const get_program_elements = _get_program_elems;
+export const isSystemLittleEndian = _isLittleEndian;
 
 const defaultShaderType = [
     "VERTEX_SHADER",
@@ -188,3 +189,16 @@ function _get_program_elems(gl, p_obj) {
 function _if_is_def(o) {
     return (o !== undefined && o !== null) ? o : null;
 }
+
+function _isLittleEndian() {
+    let uInt32 = new Uint32Array([0x11223344]);
+    let uInt8 = new Uint8Array(uInt32.buffer);
+
+    if (uInt8[0] === 0x44) {
+        return true;
+    } else if (uInt8[0] === 0x11) {
+        return false;
+    } else {
+        return false;
+    }
+};

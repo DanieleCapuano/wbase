@@ -163,12 +163,8 @@ function _buffer_data(gl, attrs_values, program_info) {
 
 function _set_uniforms(gl, uniforms_values, object_info) {
     const { program_info } = object_info;
-    const { ubos } = program_info;
+    const { ubos, uniforms } = program_info;
 
-    // Object.keys(ubos || {}).forEach(ubo_name => {
-    //     update_ubo_buffer(gl, ubos[ubo_name], uniforms_values);
-    //     uniforms_in_ubos = uniforms_in_ubos.concat(ubos[ubo_name].ubo_variable_names);
-    // });
     let uniforms_in_ubos = [];
     Object.keys(uniforms_values).forEach((uniform_name) => {
         if (uniforms_in_ubos.indexOf(uniform_name) !== -1) return;  //we've already wrote it using an ubo
@@ -176,7 +172,7 @@ function _set_uniforms(gl, uniforms_values, object_info) {
         let uniform_wrote = false;
         Object.keys(ubos || {}).forEach(ubo_name => {
             if (ubos[ubo_name].ubo_variable_names.indexOf(uniform_name) === -1) return;
-            update_ubo_buffer(gl, ubos[ubo_name], uniforms_values);
+            update_ubo_buffer(gl, ubos[ubo_name], uniforms_values, uniforms);
             uniform_wrote = true;
 
             //here we're assuming all the variable inside an ubo will be always updated together...
