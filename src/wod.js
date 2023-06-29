@@ -20,8 +20,8 @@ function _create_program(gl, vert, frag) {
     return createProgram(gl, [vertexShader, fragmentShader]);
 }
 
-function _generate_attributes_from_config(gl, shad_data, coords_dim) {
-    return Object.assign(shad_data, {
+function _generate_attributes_from_config(gl, program_info, shad_data, coords_dim) {
+    return Object.assign(program_info, shad_data, {
         attributes: Object.keys(shad_data.attributes).reduce((a_obj, attr_key) => {
             let ////////////////
                 attr_def = shad_data.attributes[attr_key],
@@ -99,8 +99,17 @@ function _init_vao(gl, program_info) {
 }
 
 function _setup_ubos(gl, program_info) {
-    const { program, uniforms } = program_info;
+    const { program, uniforms, program_index } = program_info;
 
+    const ubos_n = Object.keys(
+        Object.keys(uniforms)
+            .reduce((ubos_list, uniform_name) => Object.assign(
+                ubos_list,
+                uniforms[uniform_name].ubo ? {
+                    [uniforms[uniform_name].ubo]: true
+                } : {}
+            ), {})
+    ).length;
     let ubo_id = 0;
     const ubos = Object.keys(uniforms)
         .reduce((ubos_list, uniform_name) => {
@@ -108,7 +117,8 @@ function _setup_ubos(gl, program_info) {
                 const ubo_name = uniforms[uniform_name].ubo;
 
                 if (!ubos_list[ubo_name]) {
-                    let ubo_conf = get_ubo(gl, program, ubo_name, ubo_id);
+                    let ubo_unique_id = ubo_id + (ubos_n * program_index);
+                    let ubo_conf = get_ubo(gl, program, ubo_name, ubo_unique_id);
                     ubo_conf.ubo_variable_names = [uniform_name];
                     ubos_list[ubo_name] = ubo_conf;
                     ubo_id++;
