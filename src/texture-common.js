@@ -9,11 +9,11 @@ const textureData = (function () {
     };
 
     function _get_texture(program_obj, i) {
-        return program_obj.fbo_data[i].texture;
+        return (((program_obj || {}).fbo_data || [])[i] || {}).texture;
     }
 
     function _get_fbo(program_obj, i) {
-        return program_obj.fbo_data[i].fbo;
+        return (((program_obj || {}).fbo_data || [])[i] || {}).fbo;
     }
 
     function _init_texture(gl, texture_unit) {
