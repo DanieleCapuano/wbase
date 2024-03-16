@@ -110,7 +110,7 @@ function _setup_ubos(gl, program_info) {
                 } : {}
             ), {})
     ).length;
-    let ubo_id = 0;
+    let ubo_id = program_info.ubo_start_id || 0;
     const ubos = Object.keys(uniforms)
         .reduce((ubos_list, uniform_name) => {
             if (uniforms[uniform_name].ubo) {
