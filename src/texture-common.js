@@ -106,6 +106,9 @@ const textureData = (function () {
     }
 
     function _setFramebuffer(gl, fbo, width, height) {
+        //since we initiate fbos' textures always on unit 0 we'll be sure this is stated before we use the fbo
+        gl.activeTexture(gl.TEXTURE0);
+
         // make this the framebuffer we are rendering to.
         gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
 
